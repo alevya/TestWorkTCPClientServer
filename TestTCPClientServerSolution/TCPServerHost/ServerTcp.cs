@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace TCPServerHost
 {
-    internal class Server
+    internal class ServerTcp
     {
         private Socket _listenerSocket;
 
