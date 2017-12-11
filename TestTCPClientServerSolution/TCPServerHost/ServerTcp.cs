@@ -75,7 +75,7 @@ namespace TCPServerHost
             {
                 var argsRecieveSocket = new SocketAsyncEventArgs();
                 argsRecieveSocket.Completed += _recieveSocketOnCompleted;
-                var buffer = new byte[8];
+                var buffer = new byte[1];
                 argsRecieveSocket.SetBuffer(buffer, 0, buffer.Length);
                 rcvSocket.ReceiveAsync(argsRecieveSocket);
             }

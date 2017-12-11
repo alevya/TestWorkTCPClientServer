@@ -55,16 +55,19 @@ namespace TCPClient
 
         private void BtnStartStop_Click(object sender, RoutedEventArgs e)
         {
+            byte[] data;
             if (_isStart == false)
             {
-                _sendMessage(new byte[]{0x1});    
+                data = new byte[]{0x1};
                 _isStart = true;
             }
             else
             {
-                _sendMessage(new byte[]{0xA});
+                data = new byte[] { 0xA };
                 _isStart = false;
             }
+            _refersh();
+            _sendMessage(data);
         }
 
         #endregion
@@ -83,7 +86,10 @@ namespace TCPClient
                 BtnConnDisc.Content = "Разъединить";
                 BtnStartStop.IsEnabled = true;
             }
+
+            BtnStartStop.Content = !_isStart ? "Пуск" : "Стоп";
         }
+
 
         private bool _connectServer()
         {
