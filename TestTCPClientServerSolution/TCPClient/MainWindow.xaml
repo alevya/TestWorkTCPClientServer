@@ -5,8 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TCPClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        
+        Title="Тест клиент" Height="152" Width="525">
+    <Grid Margin="0,0,0,-1">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+      
+        <Button Grid.Column="0" Grid.Row="0" Height="50" Width="200">Соединить/Разъединить</Button>
+        <Button Grid.Column="1" Grid.Row="0" Height="50" Width="200">Пуск/Стоп</Button>
     </Grid>
 </Window>

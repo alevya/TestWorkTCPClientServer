@@ -25,12 +25,21 @@ namespace TCPServerHost
                 _listenerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 _listenerSocket.Bind(ePoint);
                 _listenerSocket.Listen(10);
+
+                var args = new SocketAsyncEventArgs();
+                args.Completed += ArgsOnCompleted;
+                _listenerSocket.AcceptAsync(args);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
             }
 
+        }
+
+        private void ArgsOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
+        {
+            
         }
     }
 }
