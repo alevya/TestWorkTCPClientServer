@@ -75,6 +75,7 @@ namespace TCPServerHost
             {
                 var argsRecieveSocket = new SocketAsyncEventArgs();
                 argsRecieveSocket.Completed += _recieveSocketOnCompleted;
+                argsRecieveSocket.AcceptSocket = rcvSocket;
                 var buffer = new byte[1];
                 argsRecieveSocket.SetBuffer(buffer, 0, buffer.Length);
                 rcvSocket.ReceiveAsync(argsRecieveSocket);
@@ -91,7 +92,23 @@ namespace TCPServerHost
 
         private void _recieveSocketOnCompleted(object sender, SocketAsyncEventArgs socketArgs)
         {
-            
+            if(socketArgs.SocketError != SocketError.Success) return;
+
+            if (socketArgs.Buffer[0] == 0x1)
+            {
+                var rnd = new Random();
+                
+                var args = new SocketAsyncEventArgs();
+                byte[] buffer = new byte[3];
+                rnd.NextBytes(buffer);
+                args.SetBuffer(buffer, 0, buffer.Length);
+                socketArgs.AcceptSocket.SendAsync(args);
+            }
+            else if (socketArgs.Buffer[0] == 0xA)
+            {
+                
+            }
+            _awaitRecieveData(1);
         }
 
         #region Properties

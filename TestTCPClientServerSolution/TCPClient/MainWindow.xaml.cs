@@ -70,6 +70,11 @@ namespace TCPClient
             _sendMessage(data);
         }
 
+        private void OnReceiveData(byte[] bytes, int size)
+        {
+
+        }
+
         #endregion
 
         #region Methods
@@ -96,6 +101,7 @@ namespace TCPClient
             if (_clientTcp == null)
             {
                 _clientTcp = new ClientTcp();
+                _clientTcp.OnReceiveData += OnReceiveData;
             }
             else
             {
@@ -124,10 +130,13 @@ namespace TCPClient
             return false;
         }
 
+        
+
         private void _disconnectServer()
         {
             if(_clientTcp == null) return;
-
+            if (_clientTcp.OnReceiveData != null)
+                _clientTcp.OnReceiveData -= OnReceiveData;
             _clientTcp.Disconnect();
         }
 

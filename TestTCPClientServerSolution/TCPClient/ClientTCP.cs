@@ -61,6 +61,8 @@ namespace TCPClient
             {
                 var args = new SocketAsyncEventArgs();
                 args.Completed += _recieveOnCompleted;
+                var buffer = new byte[3];
+                args.SetBuffer(buffer, 0, buffer.Length);
                 _socket.ReceiveAsync(args);
 
             }
@@ -77,7 +79,8 @@ namespace TCPClient
 
         private void _recieveOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
         {
-            
+            OnReceiveData?.Invoke(socketAsyncEventArgs.Buffer, socketAsyncEventArgs.Count);
+            _awaitRecieveData();
         }
 
         #endregion
@@ -85,6 +88,8 @@ namespace TCPClient
         #region Properties
 
         public bool IsConnected => _socket != null && _socket.Connected;
+
+        public Action<byte[], int> OnReceiveData { get; set; }
 
         #endregion
 
