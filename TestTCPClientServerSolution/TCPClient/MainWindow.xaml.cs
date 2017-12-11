@@ -23,11 +23,11 @@ namespace TCPClient
     public partial class MainWindow : Window
     {
         private ClientTcp _clientTcp;
-        private bool _IsConnectValid;
-        //private bool _toogleConnect;
+        private bool _isConnectValid;
+        private bool _isStart;
 
-        private string _serverName; //TODO get from Configuration
-        private string _portNum;      //TODO get from Configuration
+        private readonly string _serverName; //TODO get from Configuration
+        private readonly string _portNum;      //TODO get from Configuration
 
         public MainWindow()
         {
@@ -41,21 +41,30 @@ namespace TCPClient
 
         private void BtnConnDisc_Click(object sender, RoutedEventArgs e)
         {
-            if (_IsConnectValid == false)
+            if (_isConnectValid == false)
             {
-                _IsConnectValid = _connectServer();
+                _isConnectValid = _connectServer();
             }
             else
             {
                 _disconnectServer();
-                _IsConnectValid = false;
+                _isConnectValid = false;
             }
             _refersh();
         }
 
         private void BtnStartStop_Click(object sender, RoutedEventArgs e)
         {
-
+            if (_isStart == false)
+            {
+                _sendMessage(new byte[]{0x1});    
+                _isStart = true;
+            }
+            else
+            {
+                _sendMessage(new byte[]{0xA});
+                _isStart = false;
+            }
         }
 
         #endregion
@@ -64,7 +73,7 @@ namespace TCPClient
 
         private void _refersh()
         {
-            if (!_IsConnectValid)
+            if (!_isConnectValid)
             {
                 BtnConnDisc.Content = "Соединить";
                 BtnStartStop.IsEnabled = false;
@@ -141,6 +150,13 @@ namespace TCPClient
 
             }
             return IPAddress.Parse(addrServer);
+        }
+
+        private void _sendMessage(byte[] data)
+        {
+            if(_clientTcp.IsConnected)
+                _clientTcp.SendData(data);
+
         }
 
         #endregion

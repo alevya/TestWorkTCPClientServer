@@ -13,7 +13,7 @@ namespace TCPServerHost
             int portNum = 11111;
             var srv = new ServerTcp();
             srv.Start(portNum);
-
+            Console.WriteLine($"Server start. Listening on port {portNum}...");
             Console.ReadLine();
         }
     }

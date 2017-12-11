@@ -44,12 +44,23 @@ namespace TCPClient
             _socket?.Close();
         }
 
+        public void SendData(byte[] data)
+        {
+            if (_socket == null) return;
+            if (!_socket.Connected) return;
+
+            var argsSend = new SocketAsyncEventArgs();
+            argsSend.Completed += _sendOnCompleted;
+            argsSend.SetBuffer(data, 0, data.Length);
+            _socket.SendAsync(argsSend);
+        }
+
         private void _awaitRecieveData()
         {
             try
             {
                 var args = new SocketAsyncEventArgs();
-                args.Completed += _argsOnCompleted;
+                args.Completed += _recieveOnCompleted;
                 _socket.ReceiveAsync(args);
 
             }
@@ -59,7 +70,12 @@ namespace TCPClient
             }
         }
 
-        private void _argsOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
+        private void _sendOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
+        {
+
+        }
+
+        private void _recieveOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
         {
             
         }
