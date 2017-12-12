@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -72,7 +74,12 @@ namespace TCPClient
 
         private void OnReceiveData(byte[] bytes, int size)
         {
-
+            ColorWindow = new Color { R = bytes[0], G = bytes[1], B = bytes[2], A = 255};
+            Dispatcher.BeginInvoke(new ThreadStart(delegate
+                                                   {
+                                                       Background = new SolidColorBrush(ColorWindow);
+                                                   }));
+            
         }
 
         #endregion
@@ -175,5 +182,7 @@ namespace TCPClient
         }
 
         #endregion
+
+        public Color ColorWindow { get; private set; }
     }
 }
