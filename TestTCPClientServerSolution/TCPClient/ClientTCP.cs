@@ -66,9 +66,13 @@ namespace TCPClient
                 _socket.ReceiveAsync(args);
 
             }
-            catch (Exception e)
+            catch (ObjectDisposedException objectDisposedException)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(objectDisposedException);
+            }
+            catch (SocketException socketException)
+            {
+                Console.WriteLine(socketException);
             }
         }
 
