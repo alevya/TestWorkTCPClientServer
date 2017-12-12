@@ -41,7 +41,9 @@ namespace TCPClient
 
         public void Disconnect()
         {
-            _socket?.Close();
+            if (_socket == null) return;
+            _socket.Shutdown(SocketShutdown.Both);
+            _socket.Close();
         }
 
         public void SendData(byte[] data)
