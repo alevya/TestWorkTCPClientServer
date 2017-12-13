@@ -42,6 +42,7 @@ namespace TCPClient
             {
                 DisconnectServer();
                 _isConnectValid = false;
+                _isStart = false;
             }
             Refersh();
         }
@@ -87,15 +88,15 @@ namespace TCPClient
             if (!_isConnectValid)
             {
                 BtnConnDisc.Content = "Соединить";
+                BtnStartStop.Content = "Стоп";
                 BtnStartStop.IsEnabled = false;
             }
             else
             {
                 BtnConnDisc.Content = "Разъединить";
+                BtnStartStop.Content = !_isStart ? "Пуск" : "Стоп";
                 BtnStartStop.IsEnabled = true;
             }
-
-            BtnStartStop.Content = !_isStart ? "Пуск" : "Стоп";
         }
 
 

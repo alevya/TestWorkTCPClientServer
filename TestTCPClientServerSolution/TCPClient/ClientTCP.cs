@@ -9,10 +9,6 @@ namespace TCPClient
     {
         private Socket _socket;
 
-        #region Events
-
-        #endregion
-
         #region Methods
 
         public void Connect(IPAddress ipAddress, int portNum)

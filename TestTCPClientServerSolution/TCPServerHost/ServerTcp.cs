@@ -103,18 +103,18 @@ namespace TCPServerHost
         private void ReceiveData(IAsyncResult result)
         {
             var data = (Packet) result.AsyncState;
-            int clientNum = data.Socket.ClientId;
+            int clientNum = data.HSocket.ClientId;
             try
             {
-                int size = data.Socket.Socket.EndReceive(result);
+                int size = data.HSocket.Socket.EndReceive(result);
                 switch (data.Buffer[0])
                 {
                     case 0x1:
-                        data.Socket.IsBusy = true;
+                        data.HSocket.IsBusy = true;
                         Task.Run(() => SendData(data));
                         break;
                     case 0xA:
-                        data.Socket.IsBusy = false;
+                        data.HSocket.IsBusy = false;
                         break;
                     default:
                         break;
@@ -132,8 +132,8 @@ namespace TCPServerHost
 
         private static void SendData(Packet pack)
         {
-            var sock = pack.Socket.Socket;
-            while (sock.Connected && pack.Socket.IsBusy)
+            var sock = pack.HSocket.Socket;
+            while (sock.Connected && pack.HSocket.IsBusy)
             {
                 var rnd = new Random();
                 var args = new SocketAsyncEventArgs();
@@ -168,9 +168,9 @@ namespace TCPServerHost
         {
             public Packet(HandlerSocket socket)
             {
-                Socket = socket;
+                HSocket = socket;
             }
-            public HandlerSocket Socket { get; }
+            public HandlerSocket HSocket { get; }
             public readonly byte[] Buffer = new byte[1];
         }
     }
