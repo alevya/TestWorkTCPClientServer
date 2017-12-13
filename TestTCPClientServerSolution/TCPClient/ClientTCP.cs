@@ -10,7 +10,11 @@ namespace TCPClient
         private Socket _socket;
 
         #region Methods
-
+        /// <summary>
+        /// Установление соединения с сервером
+        /// </summary>
+        /// <param name="ipAddress"></param>
+        /// <param name="portNum"></param>
         public void Connect(IPAddress ipAddress, int portNum)
         {
             try
@@ -32,11 +36,18 @@ namespace TCPClient
             }
         }
 
+        /// <summary>
+        /// Отключение от сервера
+        /// </summary>
         public void Disconnect()
         {
             _socket?.Close();
         }
 
+        /// <summary>
+        /// Отправка команды серверу
+        /// </summary>
+        /// <param name="data"></param>
         public void SendData(byte[] data)
         {
             if (_socket == null) return;
@@ -47,6 +58,9 @@ namespace TCPClient
             _socket.SendAsync(argsSend);
         }
 
+        /// <summary>
+        /// Ожидание ответа от сервера 
+        /// </summary>
         private void AwaitRecieveData()
         {
             try
@@ -68,6 +82,11 @@ namespace TCPClient
             }
         }
 
+        /// <summary>
+        /// Обработчик при получении данных 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="socketAsyncEventArgs"></param>
         private void RecieveOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
         {
             OnReceiveData?.Invoke(socketAsyncEventArgs.Buffer, socketAsyncEventArgs.Count);
@@ -80,6 +99,9 @@ namespace TCPClient
 
         public bool IsConnected => _socket != null && _socket.Connected;
 
+        /// <summary>
+        /// Обратный вызов при получении данных от сервера 
+        /// </summary>
         public Action<byte[], int> OnReceiveData { get; set; }
 
         #endregion

@@ -32,6 +32,11 @@ namespace TCPClient
 
         #region Events
 
+        /// <summary>
+        /// Обработчик нажатия кнопки [Соединить/Разъединить]
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnConnDisc_Click(object sender, RoutedEventArgs e)
         {
             if (_isConnectValid == false)
@@ -47,6 +52,11 @@ namespace TCPClient
             Refersh();
         }
 
+        /// <summary>
+        /// Обработчик нажатия кнопки [Пуск/Стоп]
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void BtnStartStop_Click(object sender, RoutedEventArgs e)
         {
             byte[] data;
@@ -69,6 +79,11 @@ namespace TCPClient
             DisconnectServer();
         }
 
+        /// <summary>
+        /// Получение данных и перекрашивание окна
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="size"></param>
         private void OnReceiveData(byte[] bytes, int size)
         {
             var color = new Color { R = bytes[0], G = bytes[1], B = bytes[2], A = 255};
@@ -99,7 +114,10 @@ namespace TCPClient
             }
         }
 
-
+        /// <summary>
+        /// Установление соединения с сервером
+        /// </summary>
+        /// <returns></returns>
         private bool ConnectServer()
         {
             if (_clientTcp == null)
@@ -134,6 +152,9 @@ namespace TCPClient
             return false;
         }
 
+        /// <summary>
+        /// Отключение от сервера
+        /// </summary>
         private void DisconnectServer()
         {
             if(_clientTcp == null) return;
@@ -144,6 +165,10 @@ namespace TCPClient
             _clientTcp = null;
         }
 
+        /// <summary>
+        /// Определение IP-адреса сервера
+        /// </summary>
+        /// <returns></returns>
         private IPAddress ResolveIpAddress()
         {
             var addrServer = _serverName;
@@ -170,6 +195,10 @@ namespace TCPClient
             return IPAddress.Parse(addrServer);
         }
 
+        /// <summary>
+        /// Отправка команды серверу
+        /// </summary>
+        /// <param name="data"></param>
         private void SendMessage(byte[] data)
         {
             if(_clientTcp.IsConnected)
