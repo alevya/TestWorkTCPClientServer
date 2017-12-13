@@ -29,7 +29,7 @@ namespace TCPServerHost
             }
             catch (SocketException socketException)
             {
-                Debug.WriteLine(socketException.Message);
+                Console.WriteLine(socketException.Message);
             }
 
         }
@@ -108,14 +108,17 @@ namespace TCPServerHost
                 int size = data.Socket.Socket.EndReceive(result);
                 int clientNum = data.Socket.ClientId;
 
-                if (data.Buffer[0] == 0x1)
+                switch (data.Buffer[0])
                 {
-                    data.Socket.IsBusy = true;
-                    Task.Run(() => SendData(data));
-                }
-                else if (data.Buffer[0] == 0xA)
-                {
-                    data.Socket.IsBusy = false;
+                    case 0x1:
+                        data.Socket.IsBusy = true;
+                        Task.Run(() => SendData(data));
+                        break;
+                    case 0xA:
+                        data.Socket.IsBusy = false;
+                        break;
+                    default:
+                        break;
                 }
                 AwaitRecieveData(clientNum);
 
@@ -125,7 +128,7 @@ namespace TCPServerHost
                 OnClientDisconnect(data.ClientId);
                 Debug.WriteLine(socketException.Message);
             }
-           
+
         }
 
         private static void SendData(Packet pack)

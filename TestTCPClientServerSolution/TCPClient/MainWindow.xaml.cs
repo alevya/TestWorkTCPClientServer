@@ -133,8 +133,6 @@ namespace TCPClient
             return false;
         }
 
-        
-
         private void DisconnectServer()
         {
             if(_clientTcp == null) return;
