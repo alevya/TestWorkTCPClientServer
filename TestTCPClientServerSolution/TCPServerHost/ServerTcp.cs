@@ -105,19 +105,29 @@ namespace TCPServerHost
         private void _receiveData(IAsyncResult result)
         {
             var data = (Packet) result.AsyncState;
-            int size = data.Socket.Socket.EndReceive(result);
-            int clientNum = data.Socket.ClientId;
+            try
+            {
+                int size = data.Socket.Socket.EndReceive(result);
+                int clientNum = data.Socket.ClientId;
 
-            if (data.Buffer[0] == 0x1)
-            {
-                data.Socket.IsBusy = true;
-                Task.Run(() => _sendData(data));
+                if (data.Buffer[0] == 0x1)
+                {
+                    data.Socket.IsBusy = true;
+                    Task.Run(() => _sendData(data));
+                }
+                else if (data.Buffer[0] == 0xA)
+                {
+                    data.Socket.IsBusy = false;
+                }
+                _awaitRecieveData(clientNum);
+
             }
-            else if (data.Buffer[0] == 0xA)
+            catch (SocketException socketException)
             {
-                data.Socket.IsBusy = false;
+                OnClientDisconnect(data.ClientId);
+                Debug.WriteLine(socketException.Message);
             }
-            _awaitRecieveData(clientNum);
+           
         }
 
         private void _sendData(Packet pack)

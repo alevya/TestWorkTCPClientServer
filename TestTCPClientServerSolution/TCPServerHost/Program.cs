@@ -11,8 +11,19 @@ namespace TCPServerHost
             srv.Start(portNum);
             //var srv = new Server();
             //srv.Start(portNum);
-            srv.OnClientConnect += delegate(int i) { Console.WriteLine($"Client id = {i} connected"); }; 
-            srv.OnClientDisconnect += delegate(int i) { Console.WriteLine($"Client id = {i} disconnected"); };
+            srv.OnClientConnect += delegate(int id) { Console.WriteLine($"Client id = {id} connected"); }; 
+            srv.OnClientDisconnect += delegate(int id)
+            {
+                lock (srv.HandlerSockets)
+                {
+                    if (srv.HandlerSockets.ContainsKey(id))
+                    {
+                        srv.HandlerSockets[id].Socket.Close();
+                        srv.HandlerSockets.Remove(id);
+                    }
+                }
+                Console.WriteLine($"Client id = {id} disconnected");
+            };
             Console.WriteLine($"Server start. Listening on port {portNum}...");
             Console.WriteLine($"Press any key for exit");
             Console.ReadLine();

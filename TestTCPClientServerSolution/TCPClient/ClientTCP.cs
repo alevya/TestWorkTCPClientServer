@@ -29,16 +29,17 @@ namespace TCPClient
                     _awaitRecieveData();
                 }
             }
-            catch (Exception e)
+            catch (SocketException socketException)
             {
-                Debug.WriteLine(e.Message);
+                Debug.WriteLine(socketException.Message);
+                throw;
             }
         }
 
         public void Disconnect()
         {
-            if (_socket == null) return;
-            _socket.Shutdown(SocketShutdown.Both);
+            if(_socket == null) return;
+            //_socket.Shutdown(SocketShutdown.Both);
             _socket.Close();
         }
 
