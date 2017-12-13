@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -30,9 +31,22 @@ namespace TCPServerHost
             }
             catch (SocketException socketException)
             {
-                Console.WriteLine(socketException);
+                Debug.WriteLine(socketException.Message);
             }
 
+        }
+
+        public void Stop()
+        {
+            lock (HandlerSockets)
+            {
+                foreach (var item in HandlerSockets.Values)
+                {
+                    if(item.Socket.Connected)
+                        item.Socket.Close();
+                }
+                HandlerSockets.Clear();
+            }
         }
 
         private void _acceptSocketOnCompleted(object sender, SocketAsyncEventArgs socketArgs)
@@ -57,15 +71,14 @@ namespace TCPServerHost
             catch (SocketException socketException)
             {
                 OnClientDisconnect?.Invoke(_currentClientNum);
-                Console.WriteLine(socketException);
-                
+                Debug.WriteLine(socketException.Message);
             }
 
         }
 
         private void _awaitRecieveData(int clientNum)
         {
-            HandlerSocket rcvSocket = null;
+            HandlerSocket rcvSocket;
             lock (HandlerSockets)
             {
                 if(!HandlerSockets.ContainsKey(clientNum)) return;
@@ -73,23 +86,18 @@ namespace TCPServerHost
             }
 
             try
-            {
-                //var argsRecieveSocket = new SocketAsyncEventArgs();
-                //argsRecieveSocket.Completed += _recieveSocketOnCompleted;
-                //argsRecieveSocket.AcceptSocket = rcvSocket.Socket;
-                //var buffer = new byte[1];
-                //argsRecieveSocket.SetBuffer(buffer, 0, buffer.Length);
-                //rcvSocket.Socket.ReceiveAsync(argsRecieveSocket);
+            {  
                 var p = new Packet(rcvSocket, clientNum);
                 rcvSocket.Socket.BeginReceive(p.Buffer, 0, p.Buffer.Length, SocketFlags.None, _receiveData, p);
             }
             catch (SocketException socketException)
             {
-                Console.WriteLine(socketException);
+                Debug.WriteLine(socketException.Message);
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                var messageError = e.InnerException?.Message ?? e.Message;
+                Debug.WriteLine(messageError);
             }
         }
 
@@ -101,74 +109,27 @@ namespace TCPServerHost
 
             if (data.Buffer[0] == 0x1)
             {
-                //var rnd = new Random();
-
-                //var args = new SocketAsyncEventArgs();
-                //byte[] buffer = new byte[3];
-                //rnd.NextBytes(buffer);
-                //args.SetBuffer(buffer, 0, buffer.Length);
-                //socketArgs.AcceptSocket.SendAsync(args);
-                data.Socket.IsLoop = true;
+                data.Socket.IsBusy = true;
                 Task.Run(() => _sendData(data));
-
             }
             else if (data.Buffer[0] == 0xA)
             {
-                data.Socket.IsLoop = false;
+                data.Socket.IsBusy = false;
             }
             _awaitRecieveData(clientNum);
         }
 
-        private void _recieveSocketOnCompleted(object sender, SocketAsyncEventArgs socketArgs)
-        {
-            if(socketArgs.SocketError != SocketError.Success) return;
-
-            if (socketArgs.Buffer[0] == 0x1)
-            {
-                //var rnd = new Random();
-
-                //var args = new SocketAsyncEventArgs();
-                //byte[] buffer = new byte[3];
-                //rnd.NextBytes(buffer);
-                //args.SetBuffer(buffer, 0, buffer.Length);
-                //socketArgs.AcceptSocket.SendAsync(args);
-                Task.Run(() => _sendData(socketArgs));
-
-            }
-            else if (socketArgs.Buffer[0] == 0xA)
-            {
-
-            }
-            _awaitRecieveData(1);
-        }
-
-
-        private void _sendData(SocketAsyncEventArgs socketArgs)
-        {
-            while (socketArgs.Buffer[0] != 0xA)
-            {
-                var rnd = new Random();
-
-                var args = new SocketAsyncEventArgs();
-                byte[] buffer = new byte[3];
-                rnd.NextBytes(buffer);
-                args.SetBuffer(buffer, 0, buffer.Length);
-                socketArgs.AcceptSocket.Send(buffer);
-                Thread.Sleep(50);
-            }
-        }
-
         private void _sendData(Packet pack)
         {
-            while (pack.Socket.IsLoop)
+            var sock = pack.Socket.Socket;
+            while (sock.Connected && pack.Socket.IsBusy)
             {
                 var rnd = new Random();
-
                 var args = new SocketAsyncEventArgs();
                 byte[] buffer = new byte[3];
                 rnd.NextBytes(buffer);
                 args.SetBuffer(buffer, 0, buffer.Length);
-                pack.Socket.Socket.Send(buffer);
+                sock.Send(buffer);
                 Thread.Sleep(50);
             }
         }
@@ -189,7 +150,7 @@ namespace TCPServerHost
             }
             public Socket Socket { get; }
             public int ClientId { get; }
-            public bool IsLoop { get; set; }
+            public bool IsBusy { get; set; }
         }
 
         private class Packet
@@ -203,7 +164,7 @@ namespace TCPServerHost
             public HandlerSocket Socket { get; }
             public int ClientId { get; }
 
-            public byte[] Buffer = new byte[1];
+            public readonly byte[] Buffer = new byte[1];
         }
     }
 }

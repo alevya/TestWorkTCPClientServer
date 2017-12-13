@@ -63,7 +63,7 @@ namespace TCPClient
             {
                 var args = new SocketAsyncEventArgs();
                 args.Completed += _recieveOnCompleted;
-                var buffer = new byte[3];
+                var buffer = new byte[4];
                 args.SetBuffer(buffer, 0, buffer.Length);
                 _socket.ReceiveAsync(args);
 

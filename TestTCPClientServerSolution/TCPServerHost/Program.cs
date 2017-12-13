@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TCPServerHost
 {
-    class Program
+    internal class Program
     {
         static void Main(string[] args)
         {
@@ -17,6 +13,7 @@ namespace TCPServerHost
             //srv.Start(portNum);
             Console.WriteLine($"Server start. Listening on port {portNum}...");
             Console.ReadLine();
+            srv.Stop();
         }
     }
 }

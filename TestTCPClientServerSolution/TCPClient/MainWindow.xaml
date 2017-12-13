@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TCPClient"
         mc:Ignorable="d"
-        Title="Тест клиент" Height="152" Width="525">
+        Title="Тест клиент" Height="152" Width="525" Closing="Window_Closing">
     <Grid Margin="0,0,0,-1">
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
