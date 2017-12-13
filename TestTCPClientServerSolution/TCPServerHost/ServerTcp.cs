@@ -85,7 +85,7 @@ namespace TCPServerHost
 
             try
             {  
-                var p = new Packet(rcvSocket, clientNum);
+                var p = new Packet(rcvSocket);
                 rcvSocket.Socket.BeginReceive(p.Buffer, 0, p.Buffer.Length, SocketFlags.None, ReceiveData, p);
             }
             catch (SocketException socketException)
@@ -103,11 +103,10 @@ namespace TCPServerHost
         private void ReceiveData(IAsyncResult result)
         {
             var data = (Packet) result.AsyncState;
+            int clientNum = data.Socket.ClientId;
             try
             {
                 int size = data.Socket.Socket.EndReceive(result);
-                int clientNum = data.Socket.ClientId;
-
                 switch (data.Buffer[0])
                 {
                     case 0x1:
@@ -125,7 +124,7 @@ namespace TCPServerHost
             }
             catch (SocketException socketException)
             {
-                OnClientDisconnect(data.ClientId);
+                OnClientDisconnect(clientNum);
                 Debug.WriteLine(socketException.Message);
             }
 
@@ -167,15 +166,11 @@ namespace TCPServerHost
 
         private class Packet
         {
-            public Packet(HandlerSocket socket, int clientId)
+            public Packet(HandlerSocket socket)
             {
                 Socket = socket;
-                ClientId = clientId;
             }
-
             public HandlerSocket Socket { get; }
-            public int ClientId { get; }
-
             public readonly byte[] Buffer = new byte[1];
         }
     }
