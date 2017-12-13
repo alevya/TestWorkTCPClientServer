@@ -92,6 +92,7 @@ namespace TCPServerHost
             }
             catch (SocketException socketException)
             {
+                OnClientDisconnect?.Invoke(clientNum);
                 Debug.WriteLine(socketException.Message);
             }
             catch (Exception e)
