@@ -19,8 +19,8 @@ namespace TCPServerHost
             var srv = new ServerTcp();
             srv.Start(portNum);
            
-            srv.OnClientConnect += delegate(int id) { Console.WriteLine($"Client id = {id} connected"); }; 
-            srv.OnClientDisconnect += delegate(int id)
+            srv.OnClientConnect += delegate(Guid id) { Console.WriteLine($"Client id = {id} connected"); }; 
+            srv.OnClientDisconnect += delegate(Guid id)
             {
                 lock (srv.HandlerSockets)
                 {

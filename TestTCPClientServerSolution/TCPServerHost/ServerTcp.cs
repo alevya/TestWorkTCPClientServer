@@ -11,8 +11,8 @@ namespace TCPServerHost
     internal class ServerTcp
     {
         private Socket _listenerSocket;
-        public IDictionary<int, HandlerSocket> HandlerSockets = new Dictionary<int, HandlerSocket>();
-        private int _currentClientNum;
+        public IDictionary<Guid, HandlerSocket> HandlerSockets = new Dictionary<Guid, HandlerSocket>();
+        private Guid _currentClientId;
 
         public void Start(int listenPort)
         {
@@ -53,34 +53,34 @@ namespace TCPServerHost
 
             lock (HandlerSockets)
             {
-                Interlocked.Increment(ref _currentClientNum);
-                var hSocket = new HandlerSocket(socketArgs.AcceptSocket, _currentClientNum);
-                HandlerSockets.Add(_currentClientNum, hSocket);
-                OnClientConnect?.Invoke(_currentClientNum);
+                _currentClientId = Guid.NewGuid();
+                var hSocket = new HandlerSocket(socketArgs.AcceptSocket, _currentClientId);
+                HandlerSockets.Add(_currentClientId, hSocket);
+                OnClientConnect?.Invoke(_currentClientId);
             }
 
             try
             {
-                AwaitRecieveData(_currentClientNum);
+                AwaitRecieveData(_currentClientId);
                 var argsAcceptSocket = new SocketAsyncEventArgs();
                 argsAcceptSocket.Completed += AcceptSocketOnCompleted;
                 _listenerSocket.AcceptAsync(argsAcceptSocket);
             }
             catch (SocketException socketException)
             {
-                OnClientDisconnect?.Invoke(_currentClientNum);
+                OnClientDisconnect?.Invoke(_currentClientId);
                 Debug.WriteLine(socketException.Message);
             }
 
         }
 
-        private void AwaitRecieveData(int clientNum)
+        private void AwaitRecieveData(Guid clientId)
         {
             HandlerSocket rcvSocket;
             lock (HandlerSockets)
             {
-                if(!HandlerSockets.ContainsKey(clientNum)) return;
-                rcvSocket = HandlerSockets[clientNum];
+                if(!HandlerSockets.ContainsKey(clientId)) return;
+                rcvSocket = HandlerSockets[clientId];
             }
 
             try
@@ -90,7 +90,7 @@ namespace TCPServerHost
             }
             catch (SocketException socketException)
             {
-                OnClientDisconnect?.Invoke(clientNum);
+                OnClientDisconnect?.Invoke(clientId);
                 Debug.WriteLine(socketException.Message);
             }
             catch (Exception e)
@@ -103,28 +103,29 @@ namespace TCPServerHost
         private void ReceiveData(IAsyncResult result)
         {
             var data = (Packet) result.AsyncState;
-            int clientNum = data.HSocket.ClientId;
+            var clientId = data.HSocket.ClientId;
             try
             {
                 int size = data.HSocket.Socket.EndReceive(result);
-                switch (data.Buffer[0])
-                {
-                    case 0x1:
-                        data.HSocket.IsBusy = true;
-                        Task.Run(() => SendData(data));
-                        break;
-                    case 0xA:
-                        data.HSocket.IsBusy = false;
-                        break;
-                    default:
-                        break;
-                }
-                AwaitRecieveData(clientNum);
+                if(size == 1)
+                    switch (data.Buffer[0])
+                    {
+                        case 0x1:
+                            data.HSocket.IsBusy = true;
+                            Task.Run(() => SendData(data));
+                            break;
+                        case 0xA:
+                            data.HSocket.IsBusy = false;
+                            break;
+                        default:
+                            break;
+                    }
+                AwaitRecieveData(clientId);
 
             }
             catch (SocketException socketException)
             {
-                OnClientDisconnect(clientNum);
+                OnClientDisconnect(clientId);
                 Debug.WriteLine(socketException.Message);
             }
 
@@ -141,26 +142,26 @@ namespace TCPServerHost
                 rnd.NextBytes(buffer);
                 args.SetBuffer(buffer, 0, buffer.Length);
                 sock.Send(buffer);
-                Thread.Sleep(50);
+                Thread.Sleep(100);
             }
         }
 
         #region Properties
 
-        public Action<int> OnClientConnect { get; set; }
-        public Action<int> OnClientDisconnect { get; set; }
+        public Action<Guid> OnClientConnect { get; set; }
+        public Action<Guid> OnClientDisconnect { get; set; }
 
         #endregion
 
         public class HandlerSocket
         {
-            public HandlerSocket(Socket socket, int clientId)
+            public HandlerSocket(Socket socket, Guid clientId)
             {
                 Socket = socket;
                 ClientId = clientId;
             }
             public Socket Socket { get; }
-            public int ClientId { get; }
+            public Guid ClientId { get; }
             public bool IsBusy { get; set; }
         }
 
