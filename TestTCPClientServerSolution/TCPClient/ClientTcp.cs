@@ -26,7 +26,7 @@ namespace TCPClient
                 _socket.Connect(ePoint);
                 if (_socket.Connected)
                 {
-                    _awaitRecieveData();
+                    AwaitRecieveData();
                 }
             }
             catch (SocketException socketException)
@@ -38,9 +38,7 @@ namespace TCPClient
 
         public void Disconnect()
         {
-            if(_socket == null) return;
-            //_socket.Shutdown(SocketShutdown.Both);
-            _socket.Close();
+            _socket?.Close();
         }
 
         public void SendData(byte[] data)
@@ -53,12 +51,12 @@ namespace TCPClient
             _socket.SendAsync(argsSend);
         }
 
-        private void _awaitRecieveData()
+        private void AwaitRecieveData()
         {
             try
             {
                 var args = new SocketAsyncEventArgs();
-                args.Completed += _recieveOnCompleted;
+                args.Completed += RecieveOnCompleted;
                 var buffer = new byte[4];
                 args.SetBuffer(buffer, 0, buffer.Length);
                 _socket.ReceiveAsync(args);
@@ -74,10 +72,10 @@ namespace TCPClient
             }
         }
 
-        private void _recieveOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
+        private void RecieveOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
         {
             OnReceiveData?.Invoke(socketAsyncEventArgs.Buffer, socketAsyncEventArgs.Count);
-            _awaitRecieveData();
+            AwaitRecieveData();
         }
 
         #endregion
