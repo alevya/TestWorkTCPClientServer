@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -23,8 +24,10 @@ namespace TCPClient
         {
             InitializeComponent();
             _refersh();
-            _serverName = "localhost";
-            _portNum = "11111";
+
+            var appSettings = ConfigurationManager.AppSettings;
+            _serverName = appSettings.Get("server") ?? "localhost";
+            _portNum = appSettings.Get("port") ?? "11111";
         }
 
         #region Events
