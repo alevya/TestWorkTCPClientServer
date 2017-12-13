@@ -23,7 +23,7 @@ namespace TCPClient
         public MainWindow()
         {
             InitializeComponent();
-            _refersh();
+            Refersh();
 
             var appSettings = ConfigurationManager.AppSettings;
             _serverName = appSettings.Get("server") ?? "localhost";
@@ -36,14 +36,14 @@ namespace TCPClient
         {
             if (_isConnectValid == false)
             {
-                _isConnectValid = _connectServer();
+                _isConnectValid = ConnectServer();
             }
             else
             {
-                _disconnectServer();
+                DisconnectServer();
                 _isConnectValid = false;
             }
-            _refersh();
+            Refersh();
         }
 
         private void BtnStartStop_Click(object sender, RoutedEventArgs e)
@@ -59,13 +59,13 @@ namespace TCPClient
                 data = new byte[] { 0xA };
                 _isStart = false;
             }
-            _refersh();
-            _sendMessage(data);
+            Refersh();
+            SendMessage(data);
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            _disconnectServer();
+            DisconnectServer();
         }
 
         private void OnReceiveData(byte[] bytes, int size)
@@ -82,7 +82,7 @@ namespace TCPClient
 
         #region Methods
 
-        private void _refersh()
+        private void Refersh()
         {
             if (!_isConnectValid)
             {
@@ -99,7 +99,7 @@ namespace TCPClient
         }
 
 
-        private bool _connectServer()
+        private bool ConnectServer()
         {
             if (_clientTcp == null)
             {
@@ -112,7 +112,7 @@ namespace TCPClient
                     return true;
             }
 
-            var ipAddr = _resolveIpAddress();
+            var ipAddr = ResolveIpAddress();
             if (ipAddr == null) return false;
 
             if (!int.TryParse(_portNum, out int port))
@@ -135,7 +135,7 @@ namespace TCPClient
 
         
 
-        private void _disconnectServer()
+        private void DisconnectServer()
         {
             if(_clientTcp == null) return;
 
@@ -145,7 +145,7 @@ namespace TCPClient
             _clientTcp = null;
         }
 
-        private IPAddress _resolveIpAddress()
+        private IPAddress ResolveIpAddress()
         {
             var addrServer = _serverName;
             if (string.IsNullOrEmpty(addrServer)) return null;
@@ -171,7 +171,7 @@ namespace TCPClient
             return IPAddress.Parse(addrServer);
         }
 
-        private void _sendMessage(byte[] data)
+        private void SendMessage(byte[] data)
         {
             if(_clientTcp.IsConnected)
                 _clientTcp.SendData(data);

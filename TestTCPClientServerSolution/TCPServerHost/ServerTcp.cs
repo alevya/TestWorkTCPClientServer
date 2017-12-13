@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +24,7 @@ namespace TCPServerHost
                 _listenerSocket.Listen(10);
 
                 var argsAcceptSocket = new SocketAsyncEventArgs();
-                argsAcceptSocket.Completed += _acceptSocketOnCompleted;
+                argsAcceptSocket.Completed += AcceptSocketOnCompleted;
                 _listenerSocket.AcceptAsync(argsAcceptSocket);
             }
             catch (SocketException socketException)
@@ -49,7 +47,7 @@ namespace TCPServerHost
             }
         }
 
-        private void _acceptSocketOnCompleted(object sender, SocketAsyncEventArgs socketArgs)
+        private void AcceptSocketOnCompleted(object sender, SocketAsyncEventArgs socketArgs)
         {
             if(socketArgs.SocketError != SocketError.Success) return;
 
@@ -63,9 +61,9 @@ namespace TCPServerHost
 
             try
             {
-                _awaitRecieveData(_currentClientNum);
+                AwaitRecieveData(_currentClientNum);
                 var argsAcceptSocket = new SocketAsyncEventArgs();
-                argsAcceptSocket.Completed += _acceptSocketOnCompleted;
+                argsAcceptSocket.Completed += AcceptSocketOnCompleted;
                 _listenerSocket.AcceptAsync(argsAcceptSocket);
             }
             catch (SocketException socketException)
@@ -76,7 +74,7 @@ namespace TCPServerHost
 
         }
 
-        private void _awaitRecieveData(int clientNum)
+        private void AwaitRecieveData(int clientNum)
         {
             HandlerSocket rcvSocket;
             lock (HandlerSockets)
@@ -88,7 +86,7 @@ namespace TCPServerHost
             try
             {  
                 var p = new Packet(rcvSocket, clientNum);
-                rcvSocket.Socket.BeginReceive(p.Buffer, 0, p.Buffer.Length, SocketFlags.None, _receiveData, p);
+                rcvSocket.Socket.BeginReceive(p.Buffer, 0, p.Buffer.Length, SocketFlags.None, ReceiveData, p);
             }
             catch (SocketException socketException)
             {
@@ -102,7 +100,7 @@ namespace TCPServerHost
             }
         }
 
-        private void _receiveData(IAsyncResult result)
+        private void ReceiveData(IAsyncResult result)
         {
             var data = (Packet) result.AsyncState;
             try
@@ -113,13 +111,13 @@ namespace TCPServerHost
                 if (data.Buffer[0] == 0x1)
                 {
                     data.Socket.IsBusy = true;
-                    Task.Run(() => _sendData(data));
+                    Task.Run(() => SendData(data));
                 }
                 else if (data.Buffer[0] == 0xA)
                 {
                     data.Socket.IsBusy = false;
                 }
-                _awaitRecieveData(clientNum);
+                AwaitRecieveData(clientNum);
 
             }
             catch (SocketException socketException)
@@ -130,7 +128,7 @@ namespace TCPServerHost
            
         }
 
-        private void _sendData(Packet pack)
+        private static void SendData(Packet pack)
         {
             var sock = pack.Socket.Socket;
             while (sock.Connected && pack.Socket.IsBusy)
