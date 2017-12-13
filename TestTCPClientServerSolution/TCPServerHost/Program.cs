@@ -14,6 +14,7 @@ namespace TCPServerHost
             srv.OnClientConnect += delegate(int i) { Console.WriteLine($"Client id = {i} connected"); }; 
             srv.OnClientDisconnect += delegate(int i) { Console.WriteLine($"Client id = {i} disconnected"); };
             Console.WriteLine($"Server start. Listening on port {portNum}...");
+            Console.WriteLine($"Press any key for exit");
             Console.ReadLine();
             srv.Stop();
         }

@@ -17,8 +17,8 @@ namespace TCPClient
         private bool _isConnectValid;
         private bool _isStart;
 
-        private readonly string _serverName; //TODO get from Configuration
-        private readonly string _portNum;      //TODO get from Configuration
+        private readonly string _serverName; 
+        private readonly string _portNum;
 
         public MainWindow()
         {
@@ -70,10 +70,10 @@ namespace TCPClient
 
         private void OnReceiveData(byte[] bytes, int size)
         {
-            ColorWindow = new Color { R = bytes[0], G = bytes[1], B = bytes[2], A = 255};
+            var color = new Color { R = bytes[0], G = bytes[1], B = bytes[2], A = 255};
             Dispatcher.BeginInvoke(new ThreadStart(delegate
                                                    {
-                                                       Background = new SolidColorBrush(ColorWindow);
+                                                       Background = new SolidColorBrush(color);
                                                    }));
             
         }
@@ -127,7 +127,7 @@ namespace TCPClient
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                MessageBox.Show(this, e.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
 
             return false;
@@ -166,8 +166,7 @@ namespace TCPClient
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-
+                MessageBox.Show(this, e.Message, "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             return IPAddress.Parse(addrServer);
         }
@@ -180,7 +179,5 @@ namespace TCPClient
         }
 
         #endregion
-
-        public Color ColorWindow { get; private set; }
     }
 }

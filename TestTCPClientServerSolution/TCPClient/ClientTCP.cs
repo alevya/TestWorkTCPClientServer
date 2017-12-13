@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -35,7 +36,7 @@ namespace TCPClient
             }
             catch (Exception e)
             {
-                Console.WriteLine(e); 
+                Debug.WriteLine(e.Message);
             }
         }
 
@@ -52,7 +53,6 @@ namespace TCPClient
             if (!_socket.Connected) return;
 
             var argsSend = new SocketAsyncEventArgs();
-            argsSend.Completed += _sendOnCompleted;
             argsSend.SetBuffer(data, 0, data.Length);
             _socket.SendAsync(argsSend);
         }
@@ -70,17 +70,12 @@ namespace TCPClient
             }
             catch (ObjectDisposedException objectDisposedException)
             {
-                Console.WriteLine(objectDisposedException);
+                Debug.WriteLine(objectDisposedException.Message);
             }
             catch (SocketException socketException)
             {
-                Console.WriteLine(socketException);
+                Debug.WriteLine(socketException.Message);
             }
-        }
-
-        private void _sendOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
-        {
-
         }
 
         private void _recieveOnCompleted(object sender, SocketAsyncEventArgs socketAsyncEventArgs)
