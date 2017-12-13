@@ -14,6 +14,10 @@ namespace TCPServerHost
         public IDictionary<Guid, HandlerSocket> HandlerSockets = new Dictionary<Guid, HandlerSocket>();
         private Guid _currentClientId;
 
+        /// <summary>
+        /// Запуск сервера
+        /// </summary>
+        /// <param name="listenPort"></param>
         public void Start(int listenPort)
         {
             try
@@ -34,6 +38,9 @@ namespace TCPServerHost
 
         }
 
+        /// <summary>
+        /// Остановка сервера
+        /// </summary>
         public void Stop()
         {
             lock (HandlerSockets)
@@ -47,6 +54,11 @@ namespace TCPServerHost
             }
         }
 
+        /// <summary>
+        /// Обработчик события при попытке принять входящее соединение
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="socketArgs"></param>
         private void AcceptSocketOnCompleted(object sender, SocketAsyncEventArgs socketArgs)
         {
             if(socketArgs.SocketError != SocketError.Success) return;
@@ -74,6 +86,10 @@ namespace TCPServerHost
 
         }
 
+        /// <summary>
+        /// Ожидание приема команд от клиента
+        /// </summary>
+        /// <param name="clientId"></param>
         private void AwaitRecieveData(Guid clientId)
         {
             HandlerSocket rcvSocket;
@@ -100,6 +116,10 @@ namespace TCPServerHost
             }
         }
 
+        /// <summary>
+        /// Обработчик получения команды от клиента
+        /// </summary>
+        /// <param name="result"></param>
         private void ReceiveData(IAsyncResult result)
         {
             var data = (Packet) result.AsyncState;
@@ -110,11 +130,11 @@ namespace TCPServerHost
                 if(size == 1)
                     switch (data.Buffer[0])
                     {
-                        case 0x1:
+                        case 0x1://Команда <пуск>
                             data.HSocket.IsBusy = true;
                             Task.Run(() => SendData(data));
                             break;
-                        case 0xA:
+                        case 0xA://Команда <стоп>
                             data.HSocket.IsBusy = false;
                             break;
                         default:
@@ -131,6 +151,10 @@ namespace TCPServerHost
 
         }
 
+        /// <summary>
+        /// Передача клиенту 3 байта со случайными значениями 
+        /// </summary>
+        /// <param name="pack"></param>
         private static void SendData(Packet pack)
         {
             var sock = pack.HSocket.Socket;
@@ -148,7 +172,14 @@ namespace TCPServerHost
 
         #region Properties
 
+        /// <summary>
+        /// Обратный вызов при подключении клиента
+        /// </summary>
         public Action<Guid> OnClientConnect { get; set; }
+
+        /// <summary>
+        /// Обратный вызов при отключении клиента
+        /// </summary>
         public Action<Guid> OnClientDisconnect { get; set; }
 
         #endregion
