@@ -62,7 +62,7 @@ namespace TCPClient
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            _clientTcp?.Disconnect();
+            _disconnectServer();
         }
 
         private void OnReceiveData(byte[] bytes, int size)
@@ -135,9 +135,11 @@ namespace TCPClient
         private void _disconnectServer()
         {
             if(_clientTcp == null) return;
+
             if (_clientTcp.OnReceiveData != null)
                 _clientTcp.OnReceiveData -= OnReceiveData;
             _clientTcp.Disconnect();
+            _clientTcp = null;
         }
 
         private IPAddress _resolveIpAddress()
